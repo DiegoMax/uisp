@@ -1,5 +1,9 @@
 # UISP CRM API TypeScript Client
 
+[![npm version](https://badge.fury.io/js/uisp-crm-api.svg)](https://badge.fury.io/js/uisp-crm-api)
+[![GitHub](https://img.shields.io/github/license/diegomax/uisp)](https://github.com/diegomax/uisp/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org)
+
 A comprehensive TypeScript client library for the UISP (Ubiquiti ISP Platform) CRM API. This library provides type-safe access to all UISP CRM endpoints with full TypeScript support.
 
 ## Features
@@ -442,8 +446,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 - [UISP CRM Documentation](https://help.ui.com/hc/en-us/categories/360002470134-UISP)
-- [GitHub Issues](https://github.com/yourusername/uisp-crm-api/issues)
-- [API Blueprint](./unmscrm.apib) - Original API specification
+- [GitHub Issues](https://github.com/diegomax/uisp/issues)
+- [API Blueprint](https://github.com/diegomax/uisp/blob/main/unmscrm.apib) - Original API specification
 
 ## Changelog
 
