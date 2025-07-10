@@ -25,7 +25,7 @@
     "client",
     "ubiquiti"
   ],
-  "author": "Diego <your-email@example.com>",
+  "author": "Diego <massanti@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.6.0"
