@@ -14,6 +14,7 @@ describe("UispCrmClient", () => {
     it("should create client with valid config", () => {
       expect(client).toBeInstanceOf(UispCrmClient);
       expect(client.clients).toBeDefined();
+      expect(client.services).toBeDefined();
       expect(client.invoices).toBeDefined();
       expect(client.organizations).toBeDefined();
     });
@@ -58,6 +59,7 @@ describe("UispCrmClient", () => {
   describe("API groups", () => {
     it("should have all API groups initialized", () => {
       expect(client.clients).toBeDefined();
+      expect(client.services).toBeDefined();
       expect(client.invoices).toBeDefined();
       expect(client.creditNotes).toBeDefined();
       expect(client.organizations).toBeDefined();

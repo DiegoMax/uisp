@@ -9,11 +9,12 @@ A comprehensive TypeScript client library for the UISP (Ubiquiti ISP Platform) C
 ## Features
 
 - 🔒 **Type-safe** - Full TypeScript support with comprehensive type definitions
-- 🚀 **Complete API coverage** - All UISP CRM endpoints supported
+- 🚀 **Complete API coverage** - All UISP CRM endpoints supported including Services API
 - 🛡️ **Error handling** - Proper error handling with meaningful error messages
 - 📁 **Organized structure** - Clean, modular API organized by functionality
 - 🔧 **Easy configuration** - Simple setup with sensible defaults
 - 📖 **Well documented** - Comprehensive documentation and examples
+- 🔄 **Services Management** - Full support for service lifecycle management, traffic shaping, and usage tracking
 
 ## Installation
 
@@ -43,6 +44,15 @@ const newClient = await client.clients.createClient({
   firstName: "John",
   lastName: "Doe",
   email: "john.doe@example.com",
+});
+
+// Get all services
+const services = await client.services.getServices();
+
+// Create a service for the client
+const newService = await client.services.createService(newClient.data.id, {
+  name: "Internet Service",
+  price: 29.99,
 });
 ```
 
@@ -133,6 +143,99 @@ await client.clients.sendInvitation(123);
 
 // Geocode address
 await client.clients.geocodeClient(123);
+```
+
+### Services
+
+```typescript
+// Get all services
+const services = await client.services.getServices({
+  clientId: 123,
+  organizationId: 1,
+  statuses: [1], // Active services only
+  limit: 10,
+});
+
+// Get specific service
+const service = await client.services.getService(456);
+
+// Create new service for a client
+const newService = await client.services.createService(123, {
+  name: "Premium Internet Service",
+  price: 49.99,
+  servicePlanId: 1,
+  activeFrom: "2024-01-01",
+  invoicingPeriodType: 1, // MONTH
+  invoicingPeriod: 1,
+  street1: "123 Service Address",
+  city: "Service City",
+  zipCode: "12345",
+});
+
+// Update service
+const updatedService = await client.services.updateService(456, {
+  price: 59.99,
+  note: "Price updated",
+});
+
+// Service management operations
+await client.services.geocodeService(456); // Auto-geocode service address
+await client.services.activateQuotedService(456, {
+  activateDate: "2024-01-01",
+  setupFeeInvoiceImmediately: true,
+});
+await client.services.suspendService(456); // Suspend service
+await client.services.cancelSuspendService(456); // Resume service
+await client.services.endService(456); // End service permanently
+
+// Pause service for a period
+await client.services.pauseService(456, {
+  pauseFrom: "2024-06-01",
+  pauseTo: "2024-06-30",
+});
+
+// Cancel deferred changes
+await client.services.cancelDeferredChange(456);
+
+// Traffic shaping controls
+await client.services.enableTrafficShapingOverride(456, {
+  downloadSpeedOverride: 100, // Mbps
+  uploadSpeedOverride: 50, // Mbps
+});
+await client.services.disableTrafficShapingOverride(456);
+
+// Get service usage data
+const usageData = await client.services.getServiceDataUsage(
+  456,
+  "2024-01-01T00:00:00+0000"
+);
+console.log(
+  `Download: ${usageData.data.download} ${usageData.data.downloadUnit}`
+);
+
+// Service change requests
+const changeRequests = await client.services.getServiceChangeRequests();
+
+const newChangeRequest = await client.services.createServiceChangeRequest({
+  serviceId: 456,
+  servicePlanId: 2,
+  note: "Customer requested upgrade",
+});
+
+await client.services.acceptServiceChangeRequest(newChangeRequest.data.id);
+
+// Prepaid service periods (for prepaid services)
+const periods = await client.services.getPrepaidServicePeriods({
+  serviceId: 456,
+  limit: 10,
+});
+
+const newPeriod = await client.services.createPrepaidServicePeriod({
+  serviceId: 456,
+  startDate: "2024-01-01",
+  endDate: "2024-01-31",
+  price: 49.99,
+});
 ```
 
 ### Client Bank Accounts
@@ -408,6 +511,7 @@ const newClient: ClientWritable = {
 See the [`examples/`](./examples/) directory for more comprehensive examples:
 
 - [Basic Usage](./examples/usage-examples.ts)
+- [Services API Examples](./examples/services-examples.ts) - Complete Services API usage examples
 - Advanced scenarios
 - Error handling patterns
 - Real-world use cases
@@ -450,6 +554,20 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [API Blueprint](https://github.com/diegomax/uisp/blob/main/unmscrm.apib) - Original API specification
 
 ## Changelog
+
+### 1.0.3
+
+- 🎉 **New Feature: Services API** - Complete implementation of Services API endpoints
+  - Full CRUD operations for services (`getServices`, `getService`, `createService`, `updateService`, `deleteService`)
+  - Service management operations (`geocodeService`, `endService`, `activateQuotedService`, `pauseService`, `suspendService`)
+  - Traffic shaping controls (`enableTrafficShapingOverride`, `disableTrafficShapingOverride`)
+  - Usage data retrieval (`getServiceDataUsage`)
+  - Service change requests support (create, approve, delete change requests)
+  - Prepaid service periods management
+- 📚 **Documentation** - Added comprehensive Services API examples and usage documentation
+- 🧪 **Testing** - Added complete test coverage for Services API
+- 🔧 **Types** - Added complete TypeScript type definitions for all service-related objects and enums
+- ✨ **Client Integration** - Services API now accessible via `client.services.*` methods
 
 ### 1.0.0
 

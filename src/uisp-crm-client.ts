@@ -1,6 +1,7 @@
 import { HttpClient } from "./http/http-client";
 import { UispCrmConfig } from "./types";
 import { ClientsApi } from "./api/clients-api";
+import { ServicesApi } from "./api/services-api";
 import { InvoicesApi } from "./api/invoices-api";
 import { CreditNotesApi } from "./api/credit-notes-api";
 import {
@@ -45,6 +46,15 @@ import {
  *   lastName: 'Doe',
  *   email: 'john.doe@example.com'
  * });
+ *
+ * // Get all services
+ * const services = await client.services.getServices();
+ *
+ * // Create a service for a client
+ * const newService = await client.services.createService(clientId, {
+ *   name: 'Internet Service',
+ *   price: 29.99
+ * });
  * ```
  */
 export class UispCrmClient {
@@ -52,6 +62,7 @@ export class UispCrmClient {
 
   // API endpoint groups
   public readonly clients: ClientsApi;
+  public readonly services: ServicesApi;
   public readonly invoices: InvoicesApi;
   public readonly creditNotes: CreditNotesApi;
   public readonly organizations: OrganizationsApi;
@@ -91,6 +102,7 @@ export class UispCrmClient {
 
     // Initialize API classes
     this.clients = new ClientsApi(this.httpClient);
+    this.services = new ServicesApi(this.httpClient);
     this.invoices = new InvoicesApi(this.httpClient);
     this.creditNotes = new CreditNotesApi(this.httpClient);
     this.organizations = new OrganizationsApi(this.httpClient);

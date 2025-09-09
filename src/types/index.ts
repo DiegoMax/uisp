@@ -6,3 +6,4 @@ export * from "./credit-note";
 export * from "./organization";
 export * from "./document";
 export * from "./job";
+export * from "./service";
