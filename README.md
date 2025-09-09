@@ -555,6 +555,19 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Changelog
 
+### 1.0.4
+
+- 🐛 **Bug Fix: Service Attributes** - Fixed service attributes property name from `customAttributes` to `attributes` to match actual API response
+- 🔧 **Enhanced Service Types** - Updated ServiceReadOnly interface to include all missing properties from actual API response:
+  - Added `prepaid`, `fullAddress`, `hasIndividualPrice`, `totalPrice`, `currencyCode`, `invoiceLabel`
+  - Added `servicePlanType`, `servicePlanPeriodId`, `servicePlanGroupId`, `contractLengthType`
+  - Added `setupFeePrice`, `lastInvoicedDate`, `unmsClientSiteId`, `unmsClientSiteStatus`
+  - Added `addressData`, `suspensionReasonId`, `serviceChangeRequestId`, `trafficShapingOverrideEnd`, `trafficShapingOverrideEnabled`
+  - Added support for `suspensionPeriods` and `surcharges` arrays
+- 📝 **Updated Type Definitions** - Enhanced ServiceCustomAttribute interface to match API response structure
+- ✨ **New Interfaces** - Added ServiceSuspensionPeriod and ServiceSurcharge interfaces
+- 🧪 **Testing** - Added service attributes test example to verify proper typing
+
 ### 1.0.3
 
 - 🎉 **New Feature: Services API** - Complete implementation of Services API endpoints

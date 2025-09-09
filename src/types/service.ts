@@ -1,14 +1,19 @@
 export interface ServiceReadOnly {
   id: number;
   clientId: number;
-  organizationId: number;
+  organizationId?: number;
   name: string;
   status: ServiceStatus;
   price: number;
+  prepaid: boolean;
+  fullAddress?: string | null;
   servicePlanId?: number | null;
   servicePlanName?: string | null;
   servicePlanPeriod?: number | null;
   servicePlanPrice?: number | null;
+  servicePlanType?: string | null;
+  servicePlanPeriodId?: number | null;
+  servicePlanGroupId?: number | null;
   invoicingStart?: string | null;
   invoicingEnd?: string | null;
   invoicingPeriodType?: InvoicingPeriodType;
@@ -20,14 +25,16 @@ export interface ServiceReadOnly {
   invoicingSeparately?: boolean;
   invoicingLastPeriodEnd?: string | null;
   invoicingDayAdjustment?: number | null;
-  sendEmailsAutomatically?: boolean;
+  sendEmailsAutomatically?: boolean | null;
   useCreditAutomatically?: boolean;
   activeFrom?: string | null;
   activeTo?: string | null;
   contractId?: string | null;
   contractEndDate?: string | null;
+  contractLengthType?: number | null;
   minimumContractLengthMonths?: number | null;
   setupFee?: number | null;
+  setupFeePrice?: number | null;
   earlyTerminationFeePrice?: number | null;
   discountType?: DiscountType | null;
   discountValue?: number | null;
@@ -49,10 +56,14 @@ export interface ServiceReadOnly {
   note?: string | null;
   createdDate?: string;
   updatedDate?: string;
-  customAttributes?: ServiceCustomAttribute[];
+  attributes?: ServiceCustomAttribute[]; // Changed from customAttributes
   supersededById?: number | null;
   supersedingServiceId?: number | null;
   hasOutage?: boolean;
+  hasIndividualPrice?: boolean;
+  totalPrice?: number;
+  currencyCode?: string;
+  invoiceLabel?: string | null;
   downloadBurst?: number | null;
   uploadBurst?: number | null;
   downloadSpeed?: number | null;
@@ -63,6 +74,16 @@ export interface ServiceReadOnly {
   tariffPeriodId?: number | null;
   dataUsageLimit?: number | null;
   invoiceItemRounding?: InvoiceItemRounding;
+  lastInvoicedDate?: string | null;
+  unmsClientSiteId?: string | null;
+  unmsClientSiteStatus?: string | null;
+  addressData?: any | null;
+  suspensionReasonId?: number | null;
+  serviceChangeRequestId?: string | null;
+  trafficShapingOverrideEnd?: string | null;
+  trafficShapingOverrideEnabled?: boolean;
+  suspensionPeriods?: ServiceSuspensionPeriod[];
+  surcharges?: ServiceSurcharge[];
 }
 
 export interface ServiceWritable {
@@ -106,7 +127,7 @@ export interface ServiceWritable {
   stateId?: number | null;
   zipCode?: string | null;
   note?: string | null;
-  customAttributes?: ServiceCustomAttribute[];
+  attributes?: ServiceCustomAttribute[];
   downloadBurst?: number | null;
   uploadBurst?: number | null;
   downloadSpeed?: number | null;
@@ -160,7 +181,7 @@ export interface ServiceUpdate {
   stateId?: number | null;
   zipCode?: string | null;
   note?: string | null;
-  customAttributes?: ServiceCustomAttribute[];
+  attributes?: ServiceCustomAttribute[];
   downloadBurst?: number | null;
   uploadBurst?: number | null;
   downloadSpeed?: number | null;
@@ -209,8 +230,28 @@ export interface ServiceUsageReadonly {
 }
 
 export interface ServiceCustomAttribute {
+  id: string;
+  serviceId: number;
+  customAttributeId: number;
+  name: string;
   key: string;
   value: string;
+  clientZoneVisible: boolean;
+}
+
+export interface ServiceSuspensionPeriod {
+  id: number;
+  startDate: string;
+  endDate: string;
+}
+
+export interface ServiceSurcharge {
+  id: number;
+  serviceId: number;
+  surchargeId: number;
+  invoiceLabel: string;
+  price: number | null;
+  taxable: boolean;
 }
 
 export interface ServiceChangeRequest {

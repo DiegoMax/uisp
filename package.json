@@ -1,6 +1,6 @@
 {
   "name": "uisp-crm-api",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "TypeScript client library for UISP CRM API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,8 @@
     "prepare": "npm run build",
     "example:quick-start": "ts-node examples/quick-start.ts",
     "example:usage": "ts-node examples/usage-examples.ts",
-    "example:services": "ts-node examples/services-examples.ts"
+    "example:services": "ts-node examples/services-examples.ts",
+    "example:service-attributes": "ts-node examples/service-attributes-test.ts"
   },
   "keywords": [
     "uisp",
