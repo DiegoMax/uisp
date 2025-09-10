@@ -1,5 +1,16 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { UispCrmConfig, RequestConfig, ApiResponse } from "../types";
+import {
+  UispAuthenticationError,
+  UispPermissionError,
+  UispNotFoundError,
+  UispValidationError,
+  UispRateLimitError,
+  UispServerError,
+  UispServiceUnavailableError,
+  UispNetworkError,
+  UispCrmError,
+} from "../errors";
 
 export class HttpClient {
   private client: AxiosInstance;
@@ -26,8 +37,11 @@ export class HttpClient {
         return config;
       },
       (error: any) => {
-        console.error("Request error:", error);
-        return Promise.reject(error);
+        // Log only essential info, no stack traces
+        if (process.env.NODE_ENV === "development") {
+          console.error("Request setup failed:", error.message || "Unknown error");
+        }
+        return Promise.reject(this.sanitizeError(error, "Request configuration failed"));
       }
     );
 
@@ -37,100 +51,78 @@ export class HttpClient {
         return response;
       },
       (error: any) => {
-        console.error("Response error:", error);
-
-        // Handle common error cases
+        // Handle common error cases without exposing internal details
         if (error.response) {
           const { status, statusText, data } = error.response;
 
           switch (status) {
             case 401:
-              throw new Error("Unauthorized: Invalid or missing app key");
+              throw new UispAuthenticationError();
             case 403:
-              throw new Error(
-                "Forbidden: App key does not have required permissions"
-              );
+              throw new UispPermissionError();
             case 404:
-              throw new Error(`Not found: ${data?.message || statusText}`);
+              throw new UispNotFoundError(data?.message || statusText);
             case 422:
-              throw new Error(
-                `Validation error: ${data?.message || statusText}`
-              );
+              throw new UispValidationError(data?.message || statusText);
+            case 429:
+              throw new UispRateLimitError();
+            case 500:
+              throw new UispServerError();
+            case 502:
+            case 503:
+            case 504:
+              throw new UispServiceUnavailableError();
             default:
-              throw new Error(`HTTP ${status}: ${data?.message || statusText}`);
+              throw new UispCrmError(`HTTP ${status}: ${data?.message || statusText}`, "HTTP_ERROR", status);
           }
         } else if (error.request) {
-          throw new Error("Network error: No response received");
+          throw new UispNetworkError();
         } else {
-          throw new Error(`Request error: ${error.message}`);
+          throw new UispCrmError("Request failed: Please check your configuration", "REQUEST_ERROR");
         }
       }
     );
   }
 
+  /**
+   * Sanitize error to prevent stack trace exposure
+   */
+  private sanitizeError(originalError: unknown, fallbackMessage: string): UispCrmError {
+    if (originalError instanceof UispCrmError) {
+      return originalError;
+    }
+
+    const message = originalError instanceof Error ? originalError.message : fallbackMessage;
+    return new UispCrmError(message, "SANITIZED_ERROR");
+  }
+
   async get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    const response = await this.client.get<T>(
-      url,
-      this.buildRequestConfig(config)
-    );
+    const response = await this.client.get<T>(url, this.buildRequestConfig(config));
     return this.transformResponse(response);
   }
 
-  async post<T, D = any>(
-    url: string,
-    data?: D,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response = await this.client.post<T>(
-      url,
-      data,
-      this.buildRequestConfig(config)
-    );
+  async post<T, D = any>(url: string, data?: D, config?: RequestConfig): Promise<ApiResponse<T>> {
+    const response = await this.client.post<T>(url, data, this.buildRequestConfig(config));
     return this.transformResponse(response);
   }
 
-  async patch<T, D = any>(
-    url: string,
-    data?: D,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response = await this.client.patch<T>(
-      url,
-      data,
-      this.buildRequestConfig(config)
-    );
+  async patch<T, D = any>(url: string, data?: D, config?: RequestConfig): Promise<ApiResponse<T>> {
+    const response = await this.client.patch<T>(url, data, this.buildRequestConfig(config));
     return this.transformResponse(response);
   }
 
-  async put<T, D = any>(
-    url: string,
-    data?: D,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response = await this.client.put<T>(
-      url,
-      data,
-      this.buildRequestConfig(config)
-    );
+  async put<T, D = any>(url: string, data?: D, config?: RequestConfig): Promise<ApiResponse<T>> {
+    const response = await this.client.put<T>(url, data, this.buildRequestConfig(config));
     return this.transformResponse(response);
   }
 
-  async delete<T>(
-    url: string,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response = await this.client.delete<T>(
-      url,
-      this.buildRequestConfig(config)
-    );
+  async delete<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>> {
+    const response = await this.client.delete<T>(url, this.buildRequestConfig(config));
     return this.transformResponse(response);
   }
 
   // Special method for file downloads (PDFs, documents, etc.)
-  async downloadFile(
-    url: string,
-    config?: RequestConfig
-  ): Promise<ArrayBuffer> {
+  async downloadFile(url: string, config?: RequestConfig): Promise<ArrayBuffer> {
     const response = await this.client.get(url, {
       ...this.buildRequestConfig(config),
       responseType: "arraybuffer",

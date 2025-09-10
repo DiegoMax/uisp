@@ -6,15 +6,29 @@
 
 A comprehensive TypeScript client library for the UISP (Ubiquiti ISP Platform) CRM API. This library provides type-safe access to all UISP CRM endpoints with full TypeScript support.
 
+## 🎉 What's New in v1.1.0
+
+**Enhanced Security & Error Handling** - We've completely overhauled error handling to be production-ready:
+
+- **🔐 Security-first**: No more stack traces or sensitive data exposure in production
+- **🎯 Custom Error Types**: Specific error classes for different scenarios (network, auth, validation, etc.)
+- **🆔 Error Tracking**: Unique error IDs for better debugging and monitoring
+- **📊 Structured Logging**: Clean, consistent error messages perfect for logging systems
+- **🛡️ Safe by Default**: Automatic detection of development vs production environments
+
+**Breaking Change**: Error handling now uses custom error types instead of generic `Error` objects. See [Error Handling](#error-handling) for migration details.
+
 ## Features
 
 - 🔒 **Type-safe** - Full TypeScript support with comprehensive type definitions
 - 🚀 **Complete API coverage** - All UISP CRM endpoints supported including Services API
-- 🛡️ **Error handling** - Proper error handling with meaningful error messages
+- 🛡️ **Enhanced Error handling** - Production-safe error handling with custom error types and secure logging
 - 📁 **Organized structure** - Clean, modular API organized by functionality
 - 🔧 **Easy configuration** - Simple setup with sensible defaults
 - 📖 **Well documented** - Comprehensive documentation and examples
 - 🔄 **Services Management** - Full support for service lifecycle management, traffic shaping, and usage tracking
+- 🔐 **Security-focused** - Stack traces and sensitive information hidden in production
+- 🆔 **Error tracking** - Unique error IDs for debugging and monitoring
 
 ## Installation
 
@@ -205,13 +219,8 @@ await client.services.enableTrafficShapingOverride(456, {
 await client.services.disableTrafficShapingOverride(456);
 
 // Get service usage data
-const usageData = await client.services.getServiceDataUsage(
-  456,
-  "2024-01-01T00:00:00+0000"
-);
-console.log(
-  `Download: ${usageData.data.download} ${usageData.data.downloadUnit}`
-);
+const usageData = await client.services.getServiceDataUsage(456, "2024-01-01T00:00:00+0000");
+console.log(`Download: ${usageData.data.download} ${usageData.data.downloadUnit}`);
 
 // Service change requests
 const changeRequests = await client.services.getServiceChangeRequests();
@@ -470,23 +479,55 @@ const suggestions = await client.geocoding.suggestAddresses({
 
 ## Error Handling
 
-The library provides comprehensive error handling:
+The library provides comprehensive, production-safe error handling with custom error types:
 
 ```typescript
+import {
+  UispNetworkError,
+  UispAuthenticationError,
+  UispPermissionError,
+  UispNotFoundError,
+  UispValidationError,
+} from "uisp-crm-api";
+
 try {
   const client = await client.clients.getClient(123);
 } catch (error) {
-  if (error instanceof Error) {
-    console.error("Error:", error.message);
-
-    // Common error types:
-    // - "Unauthorized: Invalid or missing app key"
-    // - "Forbidden: App key does not have required permissions"
-    // - "Not found: Client with ID 123 not found"
-    // - "Validation error: Invalid email format"
+  if (error instanceof UispAuthenticationError) {
+    console.error("Authentication failed - check your app key");
+  } else if (error instanceof UispPermissionError) {
+    console.error("Insufficient permissions for this operation");
+  } else if (error instanceof UispNotFoundError) {
+    console.error("Resource not found:", error.message);
+  } else if (error instanceof UispValidationError) {
+    console.error("Invalid input data:", error.message);
+  } else if (error instanceof UispNetworkError) {
+    console.error("Network connection failed");
+  } else {
+    console.error("Unexpected error:", error.message);
   }
 }
 ```
+
+### Error Types
+
+The library includes specific error types for different scenarios:
+
+- **`UispNetworkError`** - Connection issues, server unreachable
+- **`UispAuthenticationError`** - Invalid or missing app key (401)
+- **`UispPermissionError`** - Insufficient permissions (403)
+- **`UispNotFoundError`** - Resource not found (404)
+- **`UispValidationError`** - Request validation failures (422)
+- **`UispRateLimitError`** - Rate limiting exceeded (429)
+- **`UispServerError`** - Internal server errors (500)
+- **`UispServiceUnavailableError`** - Service temporarily unavailable (503)
+
+### Security Features
+
+- **🔒 Stack trace protection**: Stack traces are hidden in production environments
+- **🎭 Sensitive data masking**: API keys, file paths, and internal details are never exposed
+- **🆔 Error tracking**: Each error includes a unique tracking ID for debugging
+- **📊 Structured logging**: Clean, consistent error messages suitable for monitoring systems
 
 ## TypeScript Support
 
@@ -553,38 +594,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [GitHub Issues](https://github.com/diegomax/uisp/issues)
 - [API Blueprint](https://github.com/diegomax/uisp/blob/main/unmscrm.apib) - Original API specification
 
-## Changelog
+## License
 
-### 1.0.4
-
-- 🐛 **Bug Fix: Service Attributes** - Fixed service attributes property name from `customAttributes` to `attributes` to match actual API response
-- 🔧 **Enhanced Service Types** - Updated ServiceReadOnly interface to include all missing properties from actual API response:
-  - Added `prepaid`, `fullAddress`, `hasIndividualPrice`, `totalPrice`, `currencyCode`, `invoiceLabel`
-  - Added `servicePlanType`, `servicePlanPeriodId`, `servicePlanGroupId`, `contractLengthType`
-  - Added `setupFeePrice`, `lastInvoicedDate`, `unmsClientSiteId`, `unmsClientSiteStatus`
-  - Added `addressData`, `suspensionReasonId`, `serviceChangeRequestId`, `trafficShapingOverrideEnd`, `trafficShapingOverrideEnabled`
-  - Added support for `suspensionPeriods` and `surcharges` arrays
-- 📝 **Updated Type Definitions** - Enhanced ServiceCustomAttribute interface to match API response structure
-- ✨ **New Interfaces** - Added ServiceSuspensionPeriod and ServiceSurcharge interfaces
-- 🧪 **Testing** - Added service attributes test example to verify proper typing
-
-### 1.0.3
-
-- 🎉 **New Feature: Services API** - Complete implementation of Services API endpoints
-  - Full CRUD operations for services (`getServices`, `getService`, `createService`, `updateService`, `deleteService`)
-  - Service management operations (`geocodeService`, `endService`, `activateQuotedService`, `pauseService`, `suspendService`)
-  - Traffic shaping controls (`enableTrafficShapingOverride`, `disableTrafficShapingOverride`)
-  - Usage data retrieval (`getServiceDataUsage`)
-  - Service change requests support (create, approve, delete change requests)
-  - Prepaid service periods management
-- 📚 **Documentation** - Added comprehensive Services API examples and usage documentation
-- 🧪 **Testing** - Added complete test coverage for Services API
-- 🔧 **Types** - Added complete TypeScript type definitions for all service-related objects and enums
-- ✨ **Client Integration** - Services API now accessible via `client.services.*` methods
-
-### 1.0.0
-
-- Initial release
-- Complete API coverage for UISP CRM v1.0
-- TypeScript support
-- Full documentation and examples
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
